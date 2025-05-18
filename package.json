@@ -1,21 +1,39 @@
 {
   "name": "runmaster-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend for RunMaster fitness app",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "build": "tsc",
+    "test": "jest"
   },
-  "keywords": [],
+  "keywords": [
+    "fitness",
+    "running",
+    "strava"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "axios": "^1.9.0",
     "cors": "^2.8.5",
+    "date-fns": "^3.0.0",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "express-async-handler": "^1.2.0",
+    "mongoose": "^8.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.11.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
   }
-
 }
