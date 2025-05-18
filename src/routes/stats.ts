@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { startOfWeek, endOfWeek } from 'date-fns';
 import { DailyChecklist } from '../models/DailyChecklist';
 import asyncHandler from 'express-async-handler';
@@ -6,7 +6,7 @@ import asyncHandler from 'express-async-handler';
 const router = express.Router();
 
 // GET /stats/:userId
-router.get('/:userId', asyncHandler(async (req, res) => {
+router.get('/:userId', asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId } = req.params;
   const now = new Date();
   const weekStart = startOfWeek(now);
@@ -34,7 +34,7 @@ router.get('/:userId', asyncHandler(async (req, res) => {
     stats.totalCalories = weeklyChecklists.reduce((sum, c) => sum + (c.caloriesEaten || 0), 0);
     
     // Calculate average mood (simplified)
-    const moodMap = { 'great': 5, 'good': 4, 'okay': 3, 'tired': 2, 'stressed': 1 };
+    const moodMap: Record<string, number> = { 'great': 5, 'good': 4, 'okay': 3, 'tired': 2, 'stressed': 1 };
     const moodSum = weeklyChecklists
       .map(c => moodMap[c.mood])
       .reduce((sum, val) => sum + val, 0);

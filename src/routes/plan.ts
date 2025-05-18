@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { TrainingPlan } from '../models/TrainingPlan';
 import asyncHandler from 'express-async-handler';
@@ -12,7 +12,7 @@ const completeWorkoutSchema = z.object({
 });
 
 // GET /plan/:userId
-router.get('/:userId', asyncHandler(async (req, res) => {
+router.get('/:userId', asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId } = req.params;
   
   const plan = await TrainingPlan.findOne({
@@ -21,14 +21,15 @@ router.get('/:userId', asyncHandler(async (req, res) => {
   });
 
   if (!plan) {
-    return res.status(404).json({ message: 'No active training plan found' });
+    res.status(404).json({ message: 'No active training plan found' });
+    return;
   }
 
   res.json(plan);
 }));
 
 // POST /plan/complete
-router.post('/complete', asyncHandler(async (req, res) => {
+router.post('/complete', asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { workoutId, stravaActivityId } = completeWorkoutSchema.parse(req.body);
   
   const plan = await TrainingPlan.findOne({
@@ -36,7 +37,8 @@ router.post('/complete', asyncHandler(async (req, res) => {
   });
 
   if (!plan) {
-    return res.status(404).json({ message: 'Workout not found' });
+    res.status(404).json({ message: 'Workout not found' });
+    return;
   }
 
   // Find and update the specific workout in the array

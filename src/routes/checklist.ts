@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { DailyChecklist } from '../models/DailyChecklist';
 import asyncHandler from 'express-async-handler';
@@ -14,7 +14,7 @@ const checklistSchema = z.object({
 });
 
 // GET /checklist/:userId/:date
-router.get('/:userId/:date', asyncHandler(async (req, res) => {
+router.get('/:userId/:date', asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId, date } = req.params;
   const queryDate = new Date(date);
   
@@ -27,14 +27,15 @@ router.get('/:userId/:date', asyncHandler(async (req, res) => {
   });
 
   if (!checklist) {
-    return res.status(404).json({ message: 'Checklist not found' });
+    res.status(404).json({ message: 'Checklist not found' });
+    return;
   }
 
   res.json(checklist);
 }));
 
 // POST /checklist/:userId/:date
-router.post('/:userId/:date', asyncHandler(async (req, res) => {
+router.post('/:userId/:date', asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId, date } = req.params;
   const validatedData = checklistSchema.parse(req.body);
   

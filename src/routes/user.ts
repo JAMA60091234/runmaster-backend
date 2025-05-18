@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { User } from '../models/User';
 import { TrainingPlan } from '../models/TrainingPlan';
@@ -17,7 +17,7 @@ const goalUpdateSchema = z.object({
 });
 
 // POST /user/:userId/goal
-router.post('/:userId/goal', asyncHandler(async (req, res) => {
+router.post('/:userId/goal', asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const { userId } = req.params;
   const goalData = goalUpdateSchema.parse(req.body);
 
@@ -37,7 +37,8 @@ router.post('/:userId/goal', asyncHandler(async (req, res) => {
   );
 
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    res.status(404).json({ message: 'User not found' });
+    return;
   }
 
   // Deactivate current plan if exists
@@ -83,8 +84,7 @@ router.post('/:userId/goal', asyncHandler(async (req, res) => {
 
     res.json({ user, plan: newPlan });
   } catch (error) {
-    console.error('AI Plan Generation Error:', error);
-    res.status(500).json({ message: 'Failed to generate new training plan' });
+    next(error);
   }
 }));
 
