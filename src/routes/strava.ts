@@ -28,10 +28,11 @@ router.get('/status/:userId', asyncHandler(async (req: Request, res: Response, n
   });
 }));
 
-// GET /connect-strava
-router.get('/connect', (_req: Request, res: Response): void => {
-  const authURL = `https://www.strava.com/oauth/authorize?client_id=${process.env.STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${process.env.STRAVA_REDIRECT_URI}&approval_prompt=auto&scope=read,activity:read`;
-  res.redirect(authURL);
+// GET /strava/auth-url/:userId
+router.get('/auth-url/:userId', (req: Request, res: Response): void => {
+  const { userId } = req.params;
+  const authURL = `https://www.strava.com/oauth/authorize?client_id=${process.env.STRAVA_CLIENT_ID}&response_type=code&redirect_uri=${process.env.STRAVA_REDIRECT_URI}&approval_prompt=auto&scope=read,activity:read&state=${userId}`;
+  res.json({ url: authURL });
 });
 
 // GET /strava/callback
