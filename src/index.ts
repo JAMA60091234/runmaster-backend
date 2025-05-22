@@ -8,6 +8,7 @@ import planRoutes from './routes/plan';
 import statsRoutes from './routes/stats';
 import userRoutes from './routes/user';
 import stravaRoutes from './routes/strava';
+import authRoutes from './routes/auth';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/plan', planRoutes);
 app.use('/stats', statsRoutes);
 app.use('/user', userRoutes);
 app.use('/strava', stravaRoutes);
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

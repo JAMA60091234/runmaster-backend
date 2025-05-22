@@ -3,6 +3,7 @@ import axios from 'axios';
 import { User } from '../models/User';
 import asyncHandler from 'express-async-handler';
 import { IUser } from '../types/user';
+import { Workout } from '../models/Workout';
 
 const router = express.Router();
 
@@ -102,6 +103,71 @@ router.post('/disconnect/:userId', asyncHandler(async (req: Request, res: Respon
   await user.save();
 
   res.json({ message: 'Strava disconnected successfully' });
+}));
+
+// POST /strava/sync/:userId
+router.post('/sync/:userId', asyncHandler(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  const { userId } = req.params;
+  
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404).json({ message: 'User not found' });
+    return;
+  }
+
+  if (!user.strava?.connected) {
+    res.status(400).json({ message: 'Strava not connected' });
+    return;
+  }
+
+  try {
+    // Check if token needs refresh
+    let accessToken = user.strava.accessToken;
+    if (user.strava.expiresAt && user.strava.expiresAt < new Date()) {
+      accessToken = await refreshStravaToken(user);
+    }
+
+    // Get recent activities from Strava
+    const activitiesResponse = await axios.get('https://www.strava.com/api/v3/athlete/activities', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      },
+      params: {
+        per_page: 30 // Get last 30 activities
+      }
+    });
+
+    const activities = activitiesResponse.data;
+
+    // Process each activity
+    for (const activity of activities) {
+      if (activity.type === 'Run') {
+        // Check if workout already exists
+        const existingWorkout = await Workout.findOne({
+          userId,
+          stravaId: activity.id.toString()
+        });
+
+        if (!existingWorkout) {
+          // Create new workout
+          await Workout.create({
+            userId,
+            type: 'Run',
+            distance: activity.distance / 1609.34, // Convert meters to miles
+            duration: activity.moving_time / 60, // Convert seconds to minutes
+            date: new Date(activity.start_date),
+            rating: 5, // Default rating
+            stravaId: activity.id.toString(),
+            stravaData: activity
+          });
+        }
+      }
+    }
+
+    res.json({ message: 'Sync completed successfully' });
+  } catch (error) {
+    next(error);
+  }
 }));
 
 // Helper function to refresh token if expired
